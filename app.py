@@ -525,16 +525,32 @@ else:
 
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.subheader("📝 Add Mock Test Score")
+        
+        # Helper function for IELTS rounding logic
+        def calculate_overall(l, r, w, s):
+            avg = (l + r + w + s) / 4
+            decimal = avg - int(avg)
+            if decimal < 0.25: return int(avg)
+            elif decimal < 0.75: return int(avg) + 0.5
+            else: return int(avg) + 1.0
+
         with st.form("add_s"):
-            c1, c2 = st.columns(2)
-            with c1: d = st.date_input("Test Date")
-            with c2: s = st.number_input("Overall Score", 0.0, 9.0, 6.5)
+            d_date = st.date_input("Test Date")
+            
+            c1, c2, c3, c4 = st.columns(4)
+            with c1: l_score = st.number_input("Listening", 0.0, 9.0, 6.0, step=0.5)
+            with c2: r_score = st.number_input("Reading", 0.0, 9.0, 6.0, step=0.5)
+            with c3: w_score = st.number_input("Writing", 0.0, 9.0, 6.0, step=0.5)
+            with c4: s_score = st.number_input("Speaking", 0.0, 9.0, 6.0, step=0.5)
             
             if st.form_submit_button("Save Score", type="primary"):
+                final_overall = calculate_overall(l_score, r_score, w_score, s_score)
                 scores_col.insert_one({
                     "username": username,
-                    "date": d.strftime("%Y-%m-%d"),
-                    "Listening": s, "Reading": s, "Writing": s, "Speaking": s
+                    "date": d_date.strftime("%Y-%m-%d"),
+                    "Listening": l_score, "Reading": r_score, "Writing": w_score, "Speaking": s_score,
+                    "Overall": final_overall
                 })
-                st.success("Score added to your history!")
+                st.success(f"Score Saved! Your Calculated Band: {final_overall}")
+                st.balloons()
         st.markdown('</div>', unsafe_allow_html=True)
