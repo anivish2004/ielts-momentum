@@ -23,7 +23,6 @@ st.set_page_config(
 # ----------------------------
 # Cookie Manager Init (No Cache)
 # ----------------------------
-# Initialization must be direct to avoid CachedWidgetWarning
 cookie_manager = stx.CookieManager()
 
 # ----------------------------
@@ -31,7 +30,7 @@ cookie_manager = stx.CookieManager()
 # ----------------------------
 st.markdown("""
     <style>
-    /* Main App Background */
+    /* Default App Background (Overridden per section) */
     .stApp {
         background: #f5f7fa;
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -466,6 +465,17 @@ if user_role == "admin":
 # STUDENT VIEW
 # ----------------------------
 else:
+    # --- NEW BACKGROUND FOR STUDENT PAGE ONLY ---
+    st.markdown("""
+        <style>
+        .stApp {
+            background: #eef2f3; /* Fallback */
+            background: linear-gradient(to right, #eef2f3, #8e9eab); /* Modern Grey-Blue Gradient */
+            background-attachment: fixed;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
     page = st.sidebar.radio("Menu", ["📊 My Dashboard", "🎮 Practice Zone", "🏆 Leaderboard", "⚙️ Settings"])
     
     if page == "📊 My Dashboard":
