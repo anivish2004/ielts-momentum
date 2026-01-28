@@ -7,6 +7,8 @@ import plotly.express as px
 import pymongo
 import bcrypt
 import os
+import extra_streamlit_components as stx
+import time
 
 # ----------------------------
 # Page config
@@ -17,6 +19,15 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ----------------------------
+# Cookie Manager Init
+# ----------------------------
+@st.cache_resource(experimental_allow_widgets=True)
+def get_manager():
+    return stx.CookieManager()
+
+cookie_manager = get_manager()
 
 # ----------------------------
 # Modern CSS
@@ -233,10 +244,23 @@ def get_level(xp): return int(1 + (xp / 100))
 # ----------------------------
 ensure_dummy_data()
 
+# Check Cookie for persistence
+cookie_user = cookie_manager.get(cookie="logged_in_user")
+
 if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
-    st.session_state.username = None
-    st.session_state.role = None
+    if cookie_user:
+        # Verify user still exists in DB
+        u_data = users_col.find_one({"username": cookie_user})
+        if u_data:
+            st.session_state.authenticated = True
+            st.session_state.username = cookie_user
+            st.session_state.role = u_data.get("role", "student")
+        else:
+            st.session_state.authenticated = False
+            st.session_state.username = None
+    else:
+        st.session_state.authenticated = False
+        st.session_state.username = None
 
 # ----------------------------
 # Login / Sign Up Screen
@@ -286,6 +310,10 @@ if not st.session_state.authenticated:
                         st.session_state.authenticated = True
                         st.session_state.username = user["username"]
                         st.session_state.role = user.get("role", "student")
+                        
+                        # SET COOKIE (Expires in 7 days)
+                        cookie_manager.set("logged_in_user", user["username"], expires_at=datetime.now() + timedelta(days=7))
+                        
                         st.rerun()
                     else: st.error("Invalid credentials")
             if st.button("New here? Create Account", use_container_width=True):
@@ -329,6 +357,7 @@ st.sidebar.markdown(f"""
 """, unsafe_allow_html=True)
 
 if st.sidebar.button("Logout", use_container_width=True):
+    cookie_manager.delete("logged_in_user")
     st.session_state.authenticated = False
     st.rerun()
 st.sidebar.markdown("---")
@@ -478,19 +507,47 @@ else:
         st.title("Today's Tasks")
         todays = get_or_create_today_challenges(username)
         completed = sum(1 for c in todays if c['completed'])
-        if todays: st.progress(completed / len(todays))
+        
+        # Display progress bar only if there are tasks
+        if todays:
+            st.progress(completed / len(todays))
+        else:
+            st.info("No tasks scheduled for today yet.")
         
         for c in todays:
             done = c['completed']
-            color = "pill-easy" if c['difficulty']=="Easy" else "pill-hard"
+            
+            # FIXED: Correct color mapping for all 3 levels
+            if c['difficulty'] == "Easy":
+                color = "pill-easy"
+            elif c['difficulty'] == "Medium":
+                color = "pill-medium"
+            else:
+                color = "pill-hard"
+            
             with st.container():
                 c1, c2 = st.columns([4, 1])
-                with c1: st.markdown(f"""<div class="challenge-box" style="opacity:{0.6 if done else 1}"><div style="display:flex;justify-content:space-between;"><b>{c['type']}</b><span class="status-pill {color}">{c['difficulty']}</span></div><p style="margin:0;color:#666 !important;">{c['duration']} • {c['xp']} XP</p></div>""", unsafe_allow_html=True)
+                # Added opacity to fade out completed tasks
+                with c1: 
+                    st.markdown(f"""
+                    <div class="challenge-box" style="opacity:{0.6 if done else 1}; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <b>{c['type']}</b>
+                            <p style="margin:0;color:#666 !important; font-size:0.9rem;">{c['duration']} • {c['xp']} XP</p>
+                        </div>
+                        <span class="status-pill {color}">{c['difficulty']}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
                 with c2:
-                    st.write(""); st.write("")
+                    st.write(""); st.write("") # Spacers for alignment
                     if not done:
-                        if st.button("Done", key=c['id']): mark_challenge_completed(username, c['id']); st.rerun()
-                    else: st.write("✅")
+                        # Unique key is crucial for buttons inside loops
+                        if st.button("Done", key=f"btn_{c['id']}"): 
+                            mark_challenge_completed(username, c['id'])
+                            st.rerun()
+                    else: 
+                        st.markdown("<div style='text-align:center; font-size:1.5rem;'>✅</div>", unsafe_allow_html=True)
 
     elif page == "🏆 Leaderboard":
         st.title("🏆 Leaderboard")
