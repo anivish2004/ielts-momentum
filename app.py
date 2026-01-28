@@ -21,13 +21,10 @@ st.set_page_config(
 )
 
 # ----------------------------
-# Cookie Manager Init
+# Cookie Manager Init (No Cache)
 # ----------------------------
-@st.cache_resource
-def get_manager():
-    return stx.CookieManager()
-
-cookie_manager = get_manager()
+# Initialization must be direct to avoid CachedWidgetWarning
+cookie_manager = stx.CookieManager()
 
 # ----------------------------
 # Modern CSS
