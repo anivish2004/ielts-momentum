@@ -168,8 +168,6 @@ Shows real-time progress without page refreshes
 
 Keeps you logged in for 7 days with secure cookies
 
-None of this is rocket science. It's clean Python, solid database design, and good UX.
-
 The Research We're Standing On
 We didn't just guess at these ideas. Everything's based on actual studies:
 
@@ -182,8 +180,6 @@ GetStream 2026: EdTech retention benchmarks. Standard apps lose 92% by Day 30.
 BabyCode Analysis: Top IELTS app. They report +1.5 band improvement in 6 weeks. We're targeting +0.3-0.5 in 4 weeks, which is proportionally aligned.
 
 ERIC Study: Online course completion rates. 2-18% is typical. We're targeting 40-50% with gamification.
-
-This isn't hope. It's tested, measurable stuff.
 
 What We're Building Next
 LeapScholar API integration: Pull mock test scores directly from their database (no manual entry)
@@ -200,9 +196,7 @@ Export reports: For parents/teachers to see progress
 
 Offline mode: Download tasks, practice without internet
 
-We've got a roadmap. This is just the foundation.
-
-Security (The Boring But Important Part)
+Security 
 Passwords are hashed with bcrypt. We're not storing passwords in plain text.
 
 Sessions are secure cookies that expire after 7 days.
@@ -215,28 +209,6 @@ Each user only sees their own data.
 
 It's not Fort Knox, but it's solid for an MVP.
 
-Want to Contribute?
-If you have ideas or want to fix bugs:
-
-Fork the repo
-
-Create a branch (git checkout -b feature/your-idea)
-
-Make your changes
-
-Test locally
-
-Push and open a Pull Request
-
-That's it. We'll review it, give feedback, and merge if it's good.
-
-Questions?
-Found a bug? Open an issue on GitHub.
-
-Have an idea? Drop it in the discussions.
-
-Want to chat about the project? You know where to find me.
-
 The Mission
 IELTS prep shouldn't feel like punishment. It should feel like progress. Like winning.
 
@@ -247,4 +219,4 @@ Try it. See if it works for you.
 Last Updated: January 29, 2026
 Status: Live & Working ✅
 
-Built with ❤️ by Animesh Vishwakarma
+Built by Animesh Vishwakarma
