@@ -1,0 +1,31 @@
+name: Keep Streamlit Alive
+
+on:
+  schedule:
+    # Runs at 00:00, 08:00, and 16:00 UTC every day (approx every 8 hours)
+    - cron: "0 0,8,16 * * *"
+  workflow_dispatch: # Allows you to run it manually from the Actions tab for testing
+
+jobs:
+  wake_up:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Selenium
+        # We install selenium here specifically for the bot, so you
+        # DON'T need to add it to your project's requirements.txt
+        run: |
+          pip install selenium webdriver-manager
+
+      - name: Run Wake Script
+        env:
+          # Replace with your actual Streamlit App URL
+          STREAMLIT_URL: "https://ielts-momentum.streamlit.app"
+        run: python wake_script.py
